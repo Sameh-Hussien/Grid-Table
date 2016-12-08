@@ -14,7 +14,7 @@ uint64_t PartitionManager::createPartition(uint64_t numRows, uint64_t numCols, b
     Partition* newPartition = Factory<Partition, uint64_t&, uint64_t&, uint64_t&, bool& >::instance()->create(partitionType, id, numRows, numCols, storageLayout);
     PartitionManager::nextPartitionID++;
 
-    //Saving a reference to the table
+    //Saving a reference to the partition
     PartitionManager::Partitions->insert(std::pair<uint64_t, Partition*>(newPartition->partitionID, newPartition));
     std::cout << "You have now " << PartitionManager::Partitions->size() << " partition(s)" << std::endl;
 
