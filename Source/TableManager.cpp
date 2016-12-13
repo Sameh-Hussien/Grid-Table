@@ -11,13 +11,13 @@ std::map<uint64_t, Table*> *TableManager::tables = new std::map<uint64_t, Table*
 /**
  *Create a new table defined by its size(rows,columns), name and default storage layout
  */
-uint64_t TableManager::createTable(uint64_t numRows, uint64_t numCols, const std::string &tableName, bool defaultStorageLayout, std::string tableType) {
-    bool tableTypeCheck = !(Factory< Table, uint64_t&, uint64_t&, uint64_t&, const string&, bool&, uint64_t&>::instance()->m_stock.find(tableType) ==
-            Factory < Table, uint64_t&, uint64_t&, uint64_t&, const string&, bool&, uint64_t&>::instance()->m_stock.end());
+uint64_t TableManager::createTable(uint64_t numCols, uint64_t numRows, const std::string &tableName, bool defaultStorageLayout, std::string tableType, const std::string &overlapResolvingMethod) {
+    bool tableTypeCheck = !(Factory< Table, uint64_t&, uint64_t&, uint64_t&, const string&, bool&, uint64_t&, const string&>::instance()->m_stock.find(tableType) ==
+            Factory < Table, uint64_t&, uint64_t&, uint64_t&, const string&, bool&, uint64_t&, const string&>::instance()->m_stock.end());
     if (numRows > 0 && numCols > 0 && tableTypeCheck) {
-        uint64_t newPartitionID = PartitionManager::createPartition(numRows, numCols, defaultStorageLayout, defaultStorageLayout == 1 ? "HorizontalPartition" : "VerticalPartition");
+        uint64_t newPartitionID = PartitionManager::createPartition(numRows, numCols, defaultStorageLayout, defaultStorageLayout == 1 ? "RowStorePartition" : "ColumnStorePartition");
         uint64_t newTableID = TableManager::nextTableID + 1;
-        Table* newTable = Factory<Table, uint64_t&, uint64_t&, uint64_t&, const string&, bool&, uint64_t&>::instance()->create(tableType, newTableID, numRows, numCols, tableName, defaultStorageLayout, newPartitionID);
+        Table* newTable = Factory<Table, uint64_t&, uint64_t&, uint64_t&, const string&, bool&, uint64_t&, const string&>::instance()->create(tableType, newTableID, numCols, numRows, tableName, defaultStorageLayout, newPartitionID, overlapResolvingMethod);
         TableManager::nextTableID++;
 
         //Saving a reference to the table
@@ -29,11 +29,12 @@ uint64_t TableManager::createTable(uint64_t numRows, uint64_t numCols, const std
         std::cout << "Number of Columns: " << newTable->numCols << std::endl;
         std::cout << "Table Name: " << newTable->tableName << std::endl;
         std::cout << "Default Storage Layout: " << newTable->defaultStorageLayout << std::endl;
+        std::cout << "Overlap Resolving Method: " << newTable->overlapResolvingMethod << std::endl;
 
         return newTable->tableID;
     } else {
         std::cout << "error: Table hasn't been created" << std::endl;
-        throw std::invalid_argument("error: invalid table argument)\r\n");
+        throw std::invalid_argument("error: invalid table argument\r\n");
     }
 }
 
@@ -43,7 +44,7 @@ uint64_t TableManager::createTable(uint64_t numRows, uint64_t numCols, const std
 void TableManager::dropTable(uint64_t tableID) {
     std::map<uint64_t, Table*>::const_iterator pos = TableManager::tables->find(tableID);
     if (pos == TableManager::tables->end()) {
-        std::cout << "no table found with id = " << tableID << std::endl;
+        throw std::invalid_argument("error: no table found with id = " + tableID);
     } else {
         Table* tbl = pos->second;
         TableManager::tables->erase(pos);
@@ -55,14 +56,66 @@ void TableManager::dropTable(uint64_t tableID) {
 }
 
 /**
- *Print a certain rectangular area partitions
+ *Print the partition IDs of a certain rectangular area
  */
-uint64_t** TableManager::getTablePartitions(uint64_t tableID, uint64_t columnID, uint64_t rowID, uint64_t width, uint64_t height) {
+std::vector<std::vector<uint64_t>> TableManager::getPartitionIDs(uint64_t tableID, uint64_t columnID, uint64_t rowID, uint64_t width, uint64_t height) {
     std::map<uint64_t, Table*>::const_iterator pos = TableManager::tables->find(tableID);
     if (pos == TableManager::tables->end()) {
-        std::cout << "no table found with id = " << tableID << std::endl;
+        throw std::invalid_argument("error: no table found with id = " + tableID);
     } else {
         Table* tbl = pos->second;
         return tbl->getPartitionIDs(columnID, rowID, width, height);
+    }
+}
+
+/**
+ *Print the distinct partition IDs of a certain rectangular area
+ */
+std::set<uint64_t>* TableManager::getdistinctPartitionIDs(uint64_t tableID, uint64_t columnID, uint64_t rowID, uint64_t width, uint64_t height) {
+    std::map<uint64_t, Table*>::const_iterator pos = TableManager::tables->find(tableID);
+    if (pos == TableManager::tables->end()) {
+        throw std::invalid_argument("error: no table found with id = " + tableID);
+    } else {
+        Table* tbl = pos->second;
+        return tbl->getDistinctPartitionIDs(columnID, rowID, width, height);
+    }
+}
+
+/**
+ * Check if the provided partition data exists within the table range
+ */
+bool TableManager::checkValidPartition(uint64_t tableID, uint64_t columnID, uint64_t rowID, uint64_t width, uint64_t height) {
+    std::map<uint64_t, Table*>::const_iterator pos = TableManager::tables->find(tableID);
+    if (pos == TableManager::tables->end()) {
+        throw std::invalid_argument("error: no table found with id = " + tableID);
+    } else {
+        Table* tbl = pos->second;
+        return tbl->checkValidPartition(columnID, rowID, width, height);
+    }
+}
+
+/**
+ * Get the overlap resolving method for a table
+ */
+std::string TableManager::getTableOverlapResolvingMethod(uint64_t tableID){
+    std::map<uint64_t, Table*>::const_iterator pos = TableManager::tables->find(tableID);
+    if (pos == TableManager::tables->end()) {
+        throw std::invalid_argument("error: no table found with id = " + tableID);
+    } else {
+        Table* tbl = pos->second;
+        return tbl->getTableOverlapResolvingMethod();
+    }
+}
+
+/**
+ * Update table partition index
+ */
+void TableManager::updateTablePartitionIndex(uint64_t tableID, uint64_t columnID, uint64_t rowID, uint64_t width, uint64_t height, uint64_t partitionID){
+    std::map<uint64_t, Table*>::const_iterator pos = TableManager::tables->find(tableID);
+    if (pos == TableManager::tables->end()) {
+        throw std::invalid_argument("error: no table found with id = " + tableID);
+    } else {
+        Table* tbl = pos->second;
+        tbl->updatePartitionIndex(columnID, rowID, width, height, partitionID);
     }
 }

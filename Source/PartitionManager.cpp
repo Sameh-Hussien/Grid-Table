@@ -6,7 +6,8 @@ uint64_t PartitionManager::nextPartitionID = 1;
 std::map<uint64_t, Partition*> *PartitionManager::Partitions = new std::map<uint64_t, Partition*>;
 
 /**
- *Create a new partition defined by its size(rows,columns), storage layout and type
+ * Create a new partition defined by its size(rows,columns), storage layout and type
+ * The function is for direct trusted internal use by the table manger and the consistency checker
  */
 uint64_t PartitionManager::createPartition(uint64_t numRows, uint64_t numCols, bool storageLayout, std::string partitionType) {
 
@@ -26,6 +27,15 @@ uint64_t PartitionManager::createPartition(uint64_t numRows, uint64_t numCols, b
     return newPartition->partitionID;
     std::cout << "error: Partition hasn't been created" << std::endl;
     return 0;
+}
+
+/*
+ * Create a new partition defined by its size(rows,columns), storage layout and type inside a table
+ * The function acts as a partition creation interface for external use
+ */
+uint64_t PartitionManager::createPartition(uint64_t tableID, uint64_t rowID, uint64_t columnID, uint64_t numRows, uint64_t numCols, bool storageLayout, std::string partitionType) {
+
+    return ConsistencyChecker::checkNewPartitionIssues(tableID, rowID, columnID, numRows, numCols, storageLayout, partitionType);
 }
 
 /**
