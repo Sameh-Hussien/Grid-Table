@@ -14,7 +14,7 @@ private:
 
     friend class PartitionManager;
 
-public:
+protected:
 
     Partition(uint64_t partitionID, uint64_t numRows, uint64_t numCols, bool storageLayout) {
         this->partitionID = partitionID;
