@@ -9,10 +9,10 @@ std::map<uint64_t, Partition*> *PartitionManager::Partitions = new std::map<uint
  * Create a new partition defined by its size(rows,columns), storage layout and type
  * The function is for direct trusted internal use by the table manger and the consistency checker
  */
-uint64_t PartitionManager::createPartition(uint64_t numRows, uint64_t numCols, bool storageLayout, std::string partitionType) {
+uint64_t PartitionManager::createPartition(uint64_t numRows, uint64_t numCols, std::string partitionType) {
 
     uint64_t id = PartitionManager::nextPartitionID + 1;
-    Partition* newPartition = Factory<Partition, uint64_t&, uint64_t&, uint64_t&, bool& >::instance()->create(partitionType, id, numRows, numCols, storageLayout);
+    Partition* newPartition = Factory<Partition, uint64_t&, uint64_t&, uint64_t&>::instance()->create(partitionType, id, numRows, numCols);
     PartitionManager::nextPartitionID++;
 
     //Saving a reference to the partition
@@ -33,9 +33,9 @@ uint64_t PartitionManager::createPartition(uint64_t numRows, uint64_t numCols, b
  * Create a new partition defined by its size(rows,columns), storage layout and type inside a table
  * The function acts as a partition creation interface for external use
  */
-uint64_t PartitionManager::createPartition(uint64_t tableID, uint64_t rowID, uint64_t columnID, uint64_t numRows, uint64_t numCols, bool storageLayout, std::string partitionType) {
+uint64_t PartitionManager::createPartition(uint64_t tableID, uint64_t rowID, uint64_t columnID, uint64_t numRows, uint64_t numCols, std::string partitionType) {
 
-    return ConsistencyChecker::checkNewPartitionIssues(tableID, rowID, columnID, numRows, numCols, storageLayout, partitionType);
+    return ConsistencyChecker::checkNewPartitionIssues(tableID, rowID, columnID, numRows, numCols, partitionType);
 }
 
 /**
@@ -72,3 +72,21 @@ void PartitionManager::dropPartition(std::set<uint64_t>* partitionID) {
     }
 }
 
+/**
+ * Change partition size
+ */
+void PartitionManager::changePartitionSize(uint64_t partitionID, int64_t numChangedRows, int64_t numChangedColumns){
+    std::map<uint64_t, Partition*>::const_iterator pos = PartitionManager::Partitions->find(partitionID);
+    if (pos == PartitionManager::Partitions->end()) {
+        std::cout << "no partition found with id = " << partitionID << std::endl;
+    } else {
+        Partition* partition = pos->second;
+        int64_t pNumCols = partition->numCols;
+        int64_t pNumRows = partition->numRows;
+        if(pNumCols + numChangedColumns >=1)
+            partition->numCols +=numChangedColumns;
+        
+        if(pNumRows + numChangedRows >=1)
+            partition->numRows +=numChangedRows;
+    }
+}
