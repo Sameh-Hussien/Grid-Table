@@ -9,7 +9,7 @@ private:
     friend class Factory<OverlapResolver>::Creator<HorizontalOverlapResolver>;
     HorizontalOverlapResolver();
     //Resolve overlap issue resulted from the creation of new partition
-    std::vector<std::vector<uint64_t>*> ResolveOverlapIssue(std::vector<std::vector<uint64_t>> partitionIndex, uint64_t rowID, uint64_t columnID, uint64_t numRows, uint64_t numCols, bool storageLayout, std::string partitionType);
+    std::vector<std::vector<uint64_t>*> ResolveOverlapIssue(const uint64_t** partitionIndex, uint64_t rowID, uint64_t columnID, uint64_t numRows, uint64_t numCols);
 };
 #endif /* HORIZONTALOVERLAPRESOLVER_H */
 

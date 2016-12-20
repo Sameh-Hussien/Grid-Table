@@ -17,4 +17,6 @@ private:
     std::set<uint64_t>* getDistinctPartitionIDs(uint64_t columnID, uint64_t rowID, uint64_t width, uint64_t height);
     //Get the resolving way of overlapped partitions
     std::string getTableOverlapResolvingMethod();
+    //Get the table partition index
+    const uint64_t** getTablePartitionIndex();
 };

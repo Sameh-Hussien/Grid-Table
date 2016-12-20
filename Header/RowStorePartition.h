@@ -4,8 +4,8 @@
 
 class RowStorePartition : public Partition {
 private:
-    friend class Factory<Partition, uint64_t&, uint64_t&, uint64_t&, bool& >::Creator<RowStorePartition>;
+    friend class Factory<Partition, uint64_t&, uint64_t&, uint64_t&>::Creator<RowStorePartition>;
 
-    RowStorePartition(uint64_t partitionID, uint64_t numRows, uint64_t numCols, bool storageLayout);
+    RowStorePartition(uint64_t partitionID, uint64_t numRows, uint64_t numCols);
 };
 #endif /* ROWSTOREPARTITION_H */

@@ -17,6 +17,8 @@ private:
     TableManager() {};
     //Update table partition index
     static void updateTablePartitionIndex(uint64_t tableID, uint64_t columnID, uint64_t rowID, uint64_t width, uint64_t height, uint64_t partitionID);
+    //Get the table partition index
+    static const uint64_t** getTablePartitionIndex(uint64_t tableID);
 public:
     //Check if the provided partition data exists within the table range
     static bool checkValidPartition(uint64_t tableID, uint64_t columnID, uint64_t rowID, uint64_t width, uint64_t height);
