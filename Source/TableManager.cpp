@@ -49,6 +49,7 @@ void TableManager::dropTable(uint64_t tableID) {
         Table* tbl = pos->second;
         TableManager::tables->erase(pos);
         PartitionManager::dropPartition(tbl->getDistinctPartitionIDs(0, 0, tbl->numCols, tbl->numRows));
+        tbl->dropTablePartitionIndex();
         delete tbl;
 
         std::cout << "You have now " << TableManager::tables->size() << " table(s)" << std::endl;

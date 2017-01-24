@@ -2,6 +2,7 @@
 #include <inttypes.h>
 #include <set>
 #include <list>
+#include <iostream>
 
 Register<Table, SimpleTable, uint64_t&, uint64_t&, uint64_t&, const string&, bool&, uint64_t&, const string&> sTable("SimpleTable");
 
@@ -11,6 +12,7 @@ Table(tableID, numCols, numRows, tableName, defaultStorageLayout, overlapResolvi
     tablePartitionID = new uint64_t*[numRows + 1];
     for (int i = 1; i < numRows + 1; i++) {
         tablePartitionID[i] = new uint64_t[numCols];
+        //std::cout<<"row: "<<i<<endl;
         //Set array to partitionID
         for (int j = 0; j < numCols; j++) {
             tablePartitionID[i][j] = partitionID;
@@ -100,4 +102,14 @@ std::string SimpleTable::getTableOverlapResolvingMethod() {
  */
 const uint64_t** SimpleTable::getTablePartitionIndex() {
     return (const uint64_t**)this->tablePartitionID;
+};
+
+/**
+ * Drop the table partition index
+ */
+void SimpleTable::dropTablePartitionIndex() {
+    for (int i = 0; i < numRows + 1; i++) {
+        delete tablePartitionID[i];
+    }
+    delete this->tablePartitionID;
 };
