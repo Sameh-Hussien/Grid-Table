@@ -19,4 +19,6 @@ private:
     std::string getTableOverlapResolvingMethod();
     //Get the table partition index
     const uint64_t** getTablePartitionIndex();
+    //Drop the table partition index
+    void dropTablePartitionIndex();
 };

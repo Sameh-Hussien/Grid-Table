@@ -25,6 +25,7 @@ protected:
     virtual std::set<uint64_t>* getDistinctPartitionIDs(uint64_t columnID, uint64_t rowID, uint64_t width, uint64_t height)=0;
     virtual std::string getTableOverlapResolvingMethod()=0;
     virtual const uint64_t** getTablePartitionIndex()=0;
+    virtual void dropTablePartitionIndex()=0;
 
 protected:
 
