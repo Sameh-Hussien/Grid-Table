@@ -4,6 +4,7 @@
 #include "VerticalOverlapResolver.h"
 #include "Test.h"
 #include <chrono>
+#include <windows.h>                // for Windows APIs
 
 Register<OverlapResolver, VerticalOverlapResolver> vOverlapResolver("VerticalOverlapResolver");
 
@@ -14,7 +15,8 @@ VerticalOverlapResolver::VerticalOverlapResolver() {
  * Resolve overlap issue resulted from the creation of new partition
  */
 std::vector<std::vector<uint64_t>*> VerticalOverlapResolver::ResolveOverlapIssue(const uint64_t** partitionIndex, uint64_t rowID, uint64_t columnID, uint64_t numRows, uint64_t numCols) {
-    uint64_t timeBefore = 0, timeAfter = 0;
+    LARGE_INTEGER timeBefore , timeAfter ;
+    LARGE_INTEGER frequency ;
     scaningTime = 0;
     scans = 0;
     overlappedPartitions = 0;
@@ -118,7 +120,11 @@ std::vector<std::vector<uint64_t>*> VerticalOverlapResolver::ResolveOverlapIssue
                 partitionRightBound = (partition->data()[2] == -1) ? columnID + numCols - 1 : partition->data()[2];
                 partitionLeftBound = (partition->data()[1] == -1) ? columnID : partition->data()[1];
 
-                timeBefore = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+                // get ticks per second
+                QueryPerformanceFrequency(&frequency);
+                // start timer
+                QueryPerformanceCounter(&timeBefore);
+                //timeBefore = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
                 while (x >= 0) {
                     scans++;
                     if (partitionIndex[x][partitionRightBound] != partitionIndex[rowID][partitionRightBound]) {
@@ -129,8 +135,11 @@ std::vector<std::vector<uint64_t>*> VerticalOverlapResolver::ResolveOverlapIssue
                         x--;
                     }
                 }
-                timeAfter = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-                scaningTime += (timeAfter - timeBefore);
+                // stop timer
+                QueryPerformanceCounter(&timeAfter);
+                scaningTime += (timeAfter.QuadPart - timeBefore.QuadPart) * 1000000.0 / frequency.QuadPart;
+                //timeAfter = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+                //scaningTime += (timeAfter - timeBefore);
 
                 if (partitionUpperBound <= partitionLowerBound) {
                     //create partition
@@ -159,7 +168,11 @@ std::vector<std::vector<uint64_t>*> VerticalOverlapResolver::ResolveOverlapIssue
                 partitionRightBound = (partition->data()[2] == -1) ? columnID + numCols - 1 : partition->data()[2];
                 partitionLeftBound = (partition->data()[1] == -1) ? columnID : partition->data()[1];
 
-                timeBefore = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+                // get ticks per second
+                QueryPerformanceFrequency(&frequency);
+                // start timer
+                QueryPerformanceCounter(&timeBefore);
+                //timeBefore = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
                 while (x < tableNoOfRows) {
                     scans++;
                     if (partitionIndex[x][partitionRightBound] != partitionIndex[rowID + numRows - 1][partitionRightBound]) {
@@ -170,8 +183,11 @@ std::vector<std::vector<uint64_t>*> VerticalOverlapResolver::ResolveOverlapIssue
                         x++;
                     }
                 }
-                timeAfter = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-                scaningTime += (timeAfter - timeBefore);
+                // stop timer
+                QueryPerformanceCounter(&timeAfter);
+                scaningTime += (timeAfter.QuadPart - timeBefore.QuadPart) * 1000000.0 / frequency.QuadPart;
+                //timeAfter = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+                //scaningTime += (timeAfter - timeBefore);
 
                 if (partitionUpperBound <= partitionLowerBound) {
                     //create partition
@@ -199,7 +215,11 @@ std::vector<std::vector<uint64_t>*> VerticalOverlapResolver::ResolveOverlapIssue
                 partitionRightBound = columnID - 1;
                 partitionLeftBound = columnID;
 
-                timeBefore = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+                // get ticks per second
+                QueryPerformanceFrequency(&frequency);
+                // start timer
+                QueryPerformanceCounter(&timeBefore);
+                //timeBefore = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
                 while (x >= 0) {
                     scans++;
                     if (partitionIndex[partitionLowerBound][x] != partitionIndex[partitionLowerBound][columnID]) {
@@ -210,8 +230,11 @@ std::vector<std::vector<uint64_t>*> VerticalOverlapResolver::ResolveOverlapIssue
                         x--;
                     }
                 }
-                timeAfter = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-                scaningTime += (timeAfter - timeBefore);
+                // stop timer
+                QueryPerformanceCounter(&timeAfter);
+                scaningTime += (timeAfter.QuadPart - timeBefore.QuadPart) * 1000000.0 / frequency.QuadPart;
+                //timeAfter = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+                //scaningTime += (timeAfter - timeBefore);
 
                 if (partitionLeftBound <= partitionRightBound) {
                     //create partition

@@ -22,6 +22,7 @@ uint64_t TableManager::createTable(uint64_t numCols, uint64_t numRows, const std
 
         //Saving a reference to the table
         TableManager::tables->insert(std::pair<uint64_t, Table*>(newTable->tableID, newTable));
+        /*
         std::cout << "You have now " << TableManager::tables->size() << " table(s)" << std::endl;
 
         std::cout << "Table ID: " << newTable->tableID << std::endl;
@@ -30,7 +31,7 @@ uint64_t TableManager::createTable(uint64_t numCols, uint64_t numRows, const std
         std::cout << "Table Name: " << newTable->tableName << std::endl;
         std::cout << "Default Storage Layout: " << newTable->defaultStorageLayout << std::endl;
         std::cout << "Overlap Resolving Method: " << newTable->overlapResolvingMethod << std::endl;
-
+        */
         return newTable->tableID;
     } else {
         std::cout << "error: Table hasn't been created" << std::endl;
@@ -52,7 +53,7 @@ void TableManager::dropTable(uint64_t tableID) {
         tbl->dropTablePartitionIndex();
         delete tbl;
 
-        std::cout << "You have now " << TableManager::tables->size() << " table(s)" << std::endl;
+        //std::cout << "You have now " << TableManager::tables->size() << " table(s)" << std::endl;
     }
 }
 

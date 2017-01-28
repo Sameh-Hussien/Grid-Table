@@ -70,7 +70,7 @@ void PartitionManager::dropPartition(std::set<uint64_t>* partitionID) {
             Partition* partition = pos->second;
             PartitionManager::Partitions->erase(pos);
             delete partition;
-            std::cout << "You have now " << PartitionManager::Partitions->size() << " partition(s)" << std::endl;
+            //std::cout << "You have now " << PartitionManager::Partitions->size() << " partition(s)" << std::endl;
         }
     }
 }
